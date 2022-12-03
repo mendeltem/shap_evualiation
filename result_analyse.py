@@ -272,7 +272,6 @@ def ttest_two_dataframes(data_1, data_2,all_shap_name = 'kernelshap' ):
 
     
 
-
 real_result_path                  = "result/real_data/all_real_data_seeds_result_cp.xlsx"
 synth_single_column_result_path   = "result/synth_data/single_column/all_synthetic_single_column_data_cp.xlsx"  
 synth_multi_column_result_path    = "result/synth_data/multi_column/all_synthetic_multi_column_data_cp.xlsx"  
@@ -284,56 +283,153 @@ synth_multi_column_result_df      = pd.read_excel(synth_multi_column_result_path
   
 
 
+real_data_statistical_path                 = "result/real_data/statistical/"
+real_synth_single_column_statistical_path  = "result/synth_data/single_column/statistical/"
+real_synth_multi_column_statistical_path   = "result/synth_data/multi_column/statistical/"
+
+
 #controll columns for real data
 general_compared =  compare_shap_glas(real_result_df)
+general_compared.to_excel("result/real_data/statistical/gernal_difference.xlsx")
+
+columns = list(real_result_df.columns)
+
+#gender balance
+test_column = 'age_sex_balance'
+test_uniques = list(real_result_df[test_column].unique())
+
+for test_unique in test_uniques:
+    test_df = real_result_df[real_result_df[test_column] == test_unique]
+    balanced_gender_compared =  compare_shap_glas(test_df)
+    balanced_gender_compared.to_excel(f"{real_data_statistical_path}{test_column}_{test_unique}.xlsx")
+
+
+test_column = 'label_balance'
+test_uniques = list(real_result_df[test_column].unique())
+
+for test_unique in test_uniques:
+    test_df = real_result_df[real_result_df[test_column] == test_unique]
+    balanced_gender_compared =  compare_shap_glas(test_df)
+    balanced_gender_compared.to_excel(f"{real_data_statistical_path}{test_column}_{test_unique}.xlsx")
+
+
+test_column = 'shap_sample_size'
+test_uniques = list(real_result_df[test_column].unique())
+
+for test_unique in test_uniques:
+    test_df = real_result_df[real_result_df[test_column] == test_unique]
+    balanced_gender_compared =  compare_shap_glas(test_df)
+    balanced_gender_compared.to_excel(f"{real_data_statistical_path}{test_column}_{test_unique}.xlsx")
+
+
+test_column = 'predicted'
+test_uniques = list(real_result_df[test_column].unique())
+
+for test_unique in test_uniques:
+    test_df = real_result_df[real_result_df[test_column] == test_unique]
+    balanced_gender_compared =  compare_shap_glas(test_df)
+    balanced_gender_compared.to_excel(f"{real_data_statistical_path}{test_column}_{test_unique}.xlsx")
+    
+
+test_column = 'actual'
+test_uniques = list(real_result_df[test_column].unique())
+
+for test_unique in test_uniques:
+    test_df = real_result_df[real_result_df[test_column] == test_unique]
+    balanced_gender_compared =  compare_shap_glas(test_df)
+    balanced_gender_compared.to_excel(f"{real_data_statistical_path}{test_column}_{test_unique}.xlsx")
 
 
 
-general_compared.columns
+test_df = real_result_df[ ( real_result_df['predicted'] == 1 ) & (real_result_df['actual'] == 1 )]
+balanced_gender_compared =  compare_shap_glas(test_df)
+balanced_gender_compared.to_excel(f"{real_data_statistical_path}tp.xlsx")
+
+
+test_df = real_result_df[ ( real_result_df['predicted'] == 0 ) & (real_result_df['actual'] == 0 )]
+balanced_gender_compared =  compare_shap_glas(test_df)
+balanced_gender_compared.to_excel(f"{real_data_statistical_path}tn.xlsx")
+
+
+test_df = real_result_df[ ( real_result_df['predicted'] == 1 ) & (real_result_df['actual'] == 0 )]
+balanced_gender_compared =  compare_shap_glas(test_df)
+balanced_gender_compared.to_excel(f"{real_data_statistical_path}fp.xlsx")
+
+
+test_df = real_result_df[ ( real_result_df['predicted'] == 0 ) & (real_result_df['actual'] == 1 )]
+balanced_gender_compared =  compare_shap_glas(test_df)
+balanced_gender_compared.to_excel(f"{real_data_statistical_path}fn.xlsx")
 
 
 
-colnames = list(general_compared["column_name"] )
+#Stability and Consistency
 
-mean_ex = general_compared['ExplainableBoosting_internal_mean_score_value']
+test_column = 'model_name'
+test_uniques = list(real_result_df[test_column].unique())
 
-
-
-
-general_compared.columns
-
-
-single_column = colnames[0]
-p_val =  general_compared[general_compared["column_name"]  == colnames[0]]['p_value'].values[0]
-
-mean_glass =  general_compared[general_compared["column_name"]  == colnames[0]]['ExplainableBoosting_internal_mean_score_value'].values[0]
-std_glassx =  general_compared[general_compared["column_name"]  == colnames[0]]['ExplainableBoosting_internal_std_score_value'].values[0]
-
-mean_shap =  general_compared[general_compared["column_name"]  == colnames[0]]['kernel_explainer_shap_mean_score_value'].values[0]
-std_shap =  general_compared[general_compared["column_name"]  == colnames[0]]['kernel_explainer_shap_std_score_value'].values[0]
-
-# Create lists for the plot
-materials = ['Glass_'+colnames[0], 'Shap_'++colnames[0]]
-x_pos = np.arange(len(materials))
-CTEs = [ mean_glass, mean_shap]
-error = [ std_glassx, std_shap]
+for test_unique in test_uniques:
+    test_df = real_result_df[real_result_df[test_column] == test_unique]
+    balanced_gender_compared =  compare_shap_glas(test_df)
+    balanced_gender_compared.to_excel(f"{real_data_statistical_path}{test_column}_{test_unique}.xlsx")
 
 
-# Build the plot
-fig, ax = plt.subplots()
-ax.bar(x_pos, CTEs, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=10)
-ax.set_ylabel(f'Difference Between internal Gals Box')
-ax.set_xticks(x_pos)
-ax.set_xticklabels(materials)
-ax.set_title(f'Difference Between internal Gals Box  P Value {p_val}')
-ax.yaxis.grid(True)
-
-# Save the figure and show
-plt.tight_layout()
-plt.savefig('bar_plot_with_error_bars.png')
-plt.show()
 
 
+
+
+# test_uniques = list(real_result_df['label_balance'].unique())
+
+# for test_unique in test_uniques:
+#     test_df = real_result_df[real_result_df['label_balance'] == test_unique]
+#     balanced_label_compared =  compare_shap_glas(test_df)
+#     balanced_label_compared.to_excel("result/real_data/statistical/balanced_label_compared_{test_unique}.xlsx")
+
+
+# test_uniques = list(real_result_df['shap_sample_size'].unique())
+
+# for test_unique in test_uniques:
+#     test_df = real_result_df[real_result_df['shap_sample_size'] == test_unique]
+#     balanced_label_compared =  compare_shap_glas(test_df)
+#     balanced_label_compared.to_excel(f"result/real_data/statistical/shap_samplesize_{test_unique}_compared.xlsx")
+
+
+
+
+
+# for single_column in colnames:
+
+#     p_val =  general_compared[general_compared["column_name"]  == single_column]['p_value'].values[0]
+#     mean_glass =  general_compared[general_compared["column_name"]  == single_column]['ExplainableBoosting_internal_mean_score_value'].values[0]
+#     std_glassx =  general_compared[general_compared["column_name"]  == single_column]['ExplainableBoosting_internal_std_score_value'].values[0]
+    
+#     mean_shap =  general_compared[general_compared["column_name"]  == single_column]['kernel_explainer_shap_mean_score_value'].values[0]
+#     std_shap =  general_compared[general_compared["column_name"]  == single_column]['kernel_explainer_shap_std_score_value'].values[0]
+    
+#     # Create lists for the plot
+#     materials = ['Glass_'+single_column, 'Shap_'+single_column]
+#     x_pos = np.arange(len(materials))
+#     CTEs = [ mean_glass, mean_shap]
+#     error = [ std_glassx, std_shap]
+    
+    
+#     # Build the plot
+#     fig, ax = plt.subplots()
+#     ax.bar(x_pos, CTEs, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=10)
+#     ax.set_ylabel(f'Scores')
+    
+#     ax.set_yticks([i/10 for i in range(0,10,1)])
+    
+#     ax.set_xticks(x_pos)
+#     ax.set_xticklabels(materials)
+#     ax.set_title(f'Difference Between internal Explanation and Shap Value   p:{p_val}')
+#     ax.yaxis.grid(True)
+    
+#     # Save the figure and show
+#     plt.tight_layout()
+#     plt.savefig(f'result/real_data/plot/bar_plot_with_error_bars_{single_column}.png')
+#     plt.show()
+    
+    
 
 
 
